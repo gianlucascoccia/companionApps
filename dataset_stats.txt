@@ -1,0 +1,13 @@
+
+Scraping performed on week 17/05/21 - 23/05/21
+
+Dataset stats
+
+921 products with Android companion app
+280 distinct Android apps
+
+1882241 unfiltered reviews
+1249853 filtered reviews (english AND >= 5 words)
+ 606857 reviews after second filtering step (year >= 2019)
+
+Sample size after all filterings (95% CI, 5% ME) = 384, rounded up to 400
