@@ -3,19 +3,34 @@
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
+import csv
 
 # %% params
 
+APPS = "data/processed/app_store_data.csv"
 ALL_REVIEWS = "data/processed/reviews_all.csv"
+FILTERED_REVIEWS = "data/processed/reviews_filtered.csv"
 
-# %% load reviews
+# %% load data
 
 all_reviews = pd.read_csv(ALL_REVIEWS, delimiter=";")
+filtered_reviews = pd.read_csv(FILTERED_REVIEWS, delimiter=";")
+
+apps = pd.read_csv(APPS, delimiter=";")
 
 # %% Parse year of reviews
 
 all_reviews['date'] = pd.to_datetime(all_reviews['date'])
 all_reviews['year'] = all_reviews['date'].dt.year
+
+filtered_reviews['date'] = pd.to_datetime(filtered_reviews['date'])
+filtered_reviews['year'] = filtered_reviews['date'].dt.year
+
+# %% descriptive stats 
+
+all_reviews.describe()
+filtered_reviews.describe()
+apps.describe()
 
 # %% check frequencies of scores
 
@@ -58,5 +73,22 @@ plt.xlabel("Year", size=12)
 plt.ylabel("Score %", size=12)
 plt.tight_layout()
 plt.savefig('figures/scores_by_year.pdf', facecolor='white')
+
+# %% sentiment frequencies
+
+sentiments = filtered_reviews['sentiment'].value_counts(normalize=True).apply(lambda x: round(x,2))
+
+# %% sentiment by year
+
+sentiments_by_year = filtered_reviews[filtered_reviews['score'] > 0]
+
+year_counts = sentiments_by_year.groupby(['year']).count()['id']
+
+sentiments_by_year = sentiments_by_year.groupby(['year', 'sentiment']).size()
+
+sentiments_by_year = round(sentiments_by_year / year_counts, 2) * 100
+
+# Remove year with low number of data points
+sentiments_by_year = sentiments_by_year[3:].reset_index()
 
 # %%

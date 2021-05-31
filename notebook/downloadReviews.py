@@ -10,7 +10,7 @@ import os.path as path
 
 # %% params
 
-APP_LIST = "data/raw/companion_apps_urls.csv"
+APP_LIST = "data/processed/app_store_data.csv"
 OUT_FOLDER = "data/raw/reviews/"
 ERROR_LOG = "reviews_error_log.txt"
 MIN_SLEEP = 5
@@ -48,9 +48,8 @@ with open(APP_LIST) as app_list:
     app_reader = csv.DictReader(app_list, delimiter=';', quoting=csv.QUOTE_MINIMAL)
     
     for line in app_reader:
-        if len(line['Android_URL']) == 0:
-            continue
-        app_id = line['Android_URL'].split('=')[1].split('&')[0]
+        
+        app_id = line['appId']
         file_path = OUT_FOLDER + app_id + ".json"
 
         # Skip reviews already downloaded

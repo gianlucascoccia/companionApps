@@ -13,10 +13,14 @@ analyzer = SentimentIntensityAnalyzer()
 # %% params
 
 IN_FOLDER = "data/raw/reviews"
-APPS_LIST = "data/raw/companion_apps_urls.csv"
+APPS_LIST = "data/processed/app_store_data.csv"
 OUT_FOLDER = "data/processed/reviews"
 OUT_FILE = "data/processed/reviews_filtered.csv"
 OUT_FILE_ALL = "data/processed/reviews_all.csv"
+
+FILTER_WORDS = True
+FILTER_LANGUAGE = True
+FILTER_SENTIMENT = True
 
 # %% helper fun
 
@@ -44,10 +48,10 @@ apps = pd.read_csv(APPS_LIST, delimiter=";")
 
 for index, row in apps.iterrows():
 
-    if row['Android_URL'] is np.nan:
+    if row['appId'] is np.nan:
         continue
 
-    app_name = row['Android_URL'].split('=')[1].split('&')[0]
+    app_name = row['appId']
 
     out_file_name = os.path.join(OUT_FOLDER, app_name + '.csv') 
 
@@ -73,19 +77,22 @@ for index, row in apps.iterrows():
     file_reviews['wordCount'] = file_reviews['text'].str.split().str.len().astype('Int64')
 
     # Remove word count < 5
-    file_reviews = file_reviews[file_reviews['wordCount'] >= 5]
+    if FILTER_WORDS:
+        file_reviews = file_reviews[file_reviews['wordCount'] >= 5]
 
     # Language recognition
     file_reviews['language'] = file_reviews['text'].apply(detect_lang)
 
     # Remove language != english
-    file_reviews = file_reviews[file_reviews['language'] == 'en']
+    if FILTER_LANGUAGE:
+        file_reviews = file_reviews[file_reviews['language'] == 'en']
 
     # Sentiment analysis 
     file_reviews['sentiment'] = file_reviews['text'].apply(detect_sentiment)
 
     # Remove undefined sentiment
-    file_reviews = file_reviews[file_reviews['sentiment'] != 'UNDEFINED']
+    if FILTER_SENTIMENT:
+        file_reviews = file_reviews[file_reviews['sentiment'] != 'UNDEFINED']
 
     filtered_count = len(file_reviews.index)
     print("Filtered reviews count {}".format(filtered_count))
@@ -105,8 +112,10 @@ print("{} Filtered reviews".format(len(all_reviews.index)))
 
 dfs = [pd.read_json(f) for f in glob.glob(os.path.join(IN_FOLDER, "*.json"))]
 all_reviews = pd.concat(dfs)
+all_reviews = all_reviews.drop(['criterias', 'userImage', 'scoreText'], axis=1)
 
 all_reviews.to_csv(OUT_FILE_ALL, sep=";", quoting=csv.QUOTE_NONNUMERIC)
 print("{} Filtered reviews".format(len(all_reviews.index)))
+
 
 # %%

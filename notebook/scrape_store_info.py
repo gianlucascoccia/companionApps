@@ -6,11 +6,12 @@ import json
 from json import JSONDecodeError
 import os
 import os.path
+import numpy as np
 
 # %% script configuration
 
-APPS_LIST = 'data/raw/app_list.csv'
-OUT_FILE = 'data/raw/app_store_data.csv'
+APPS_LIST = 'data/raw/companion_apps_urls.csv'
+OUT_FILE = 'data/processed/app_store_data.csv'
 ERROR_LOG = 'missing_data.txt'
 
 # %% fields to write in output
@@ -89,8 +90,13 @@ with open(APPS_LIST, 'r') as csvfile:
     for index, row in enumerate(csvreader):
 
         print('Processing app N {}'.format(index))
+        
+        if len(row['Android_URL']) == 0:
+            continue
+        app_name = row['Android_URL'].split('=')[1].split('&')[0]
+        
         # Run the node scraper
-        scraper = subprocess.run(['node', 'store_scraper/scrape_app.js', row['id']], stdout=subprocess.PIPE)
+        scraper = subprocess.run(['node', 'store_scraper/scrape_app.js', app_name], stdout=subprocess.PIPE)
         # sleep(randint(10, 60))
         if scraper.returncode == 0:
             try:
@@ -99,7 +105,7 @@ with open(APPS_LIST, 'r') as csvfile:
                 
                 if 'status' in output:
                     if output['status'] == 404:
-                        error_report(row['id'])
+                        error_report(app_name)
                         continue
                 else:
                     for field in app_fields:
@@ -110,9 +116,10 @@ with open(APPS_LIST, 'r') as csvfile:
                                 output[field] = ' '.join(output[field].splitlines())
                     write_data(output)
             except JSONDecodeError:
-                error_report(row['id'])
+                error_report(app_name)
                 continue
 
         else:
-            error_report(row['id'])
+            error_report(app_name)
+
 # %%
