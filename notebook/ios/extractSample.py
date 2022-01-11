@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 IN_FILE = "data/processed/reviews_filtered.csv"
 OUT_FILE = "data/processed/sample.csv"
-SAMPLE_SIZE = 400
+SAMPLE_SIZE = 500
 
 # %% load reviews
 
@@ -16,8 +16,8 @@ reviews = pd.read_csv(IN_FILE, delimiter=";")
 
 # %% remove older reviews
 
-reviews['date'] = pd.to_datetime(reviews['date'])
-reviews = reviews[reviews['date'].dt.year >= 2019]
+reviews['updated'] = pd.to_datetime(reviews['updated'])
+reviews = reviews[reviews['updated'].dt.year >= 2019]
 
 # %% check frequencies of scores
 
