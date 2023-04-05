@@ -12,15 +12,15 @@ analyzer = SentimentIntensityAnalyzer()
 
 # %% params
 
-IN_FOLDER = "data/raw/reviews"
-APPS_LIST = "data/processed/app_store_data.csv"
-OUT_FOLDER = "data/processed/reviews"
-OUT_FILE = "data/processed/reviews_filtered.csv"
-OUT_FILE_ALL = "data/processed/reviews_all.csv"
+IN_FOLDER = "data/Android/raw/reviews"
+APPS_LIST = "data/Android/processed/app_store_data.csv"
+OUT_FOLDER = "data/Android/processed/reviews"
+OUT_FILE = "data/Android/processed/reviews_english2.csv"
+OUT_FILE_ALL = "data/Android/processed/reviews_all2.csv"
 
-FILTER_WORDS = True
+FILTER_WORDS = False
 FILTER_LANGUAGE = True
-FILTER_SENTIMENT = True
+FILTER_SENTIMENT = False
 
 # %% helper fun
 
@@ -33,10 +33,16 @@ def detect_lang(text):
 def detect_sentiment(text):
     try:
         scores = analyzer.polarity_scores(text)
-        if scores['compound'] >= 0.05:
+        return scores['compound']
+    except: 
+        return np.nan
+
+def parse_sentiment(score):
+    try:
+        if score >= 0.05:
             return "POSITIVE"
-        elif scores['compound'] <= -0.05:  
-            return "NEGATIVE"
+        elif score <= -0.05:  
+            return  "NEGATIVE"
         else:
             return "NEUTRAL"
     except: 
@@ -53,13 +59,13 @@ for index, row in apps.iterrows():
 
     app_name = row['appId']
 
-    out_file_name = os.path.join(OUT_FOLDER, app_name + '.csv') 
+    out_file_name = os.path.join(OUT_FOLDER, '{}.csv'.format(app_name)) 
 
     if os.path.isfile(out_file_name):
         print("Skipping {}".format(app_name))
         continue
 
-    in_file_name = os.path.join(IN_FOLDER, app_name + '.json')
+    in_file_name = os.path.join(IN_FOLDER, '{}.json'.format(app_name))
 
     print("Processing {}".format(app_name))
     
@@ -67,7 +73,10 @@ for index, row in apps.iterrows():
         continue
 
     file_reviews = pd.read_json(in_file_name)
-    file_reviews = file_reviews.drop(['criterias', 'userImage', 'scoreText'], axis=1)
+    try:
+        file_reviews = file_reviews.drop(['criterias', 'userImage', 'scoreText'], axis=1)
+    except KeyError:
+        pass
     file_reviews['app'] = app_name
 
     reviews_number = len(file_reviews.index)
@@ -88,7 +97,9 @@ for index, row in apps.iterrows():
         file_reviews = file_reviews[file_reviews['language'] == 'en']
 
     # Sentiment analysis 
-    file_reviews['sentiment'] = file_reviews['text'].apply(detect_sentiment)
+    file_reviews['sentiment_score'] = np.nan
+    file_reviews['sentiment_score'] = file_reviews['text'].apply(detect_sentiment)
+    file_reviews['sentiment'] = file_reviews['sentiment_score'].apply(parse_sentiment)
 
     # Remove undefined sentiment
     if FILTER_SENTIMENT:
@@ -104,6 +115,7 @@ for index, row in apps.iterrows():
 
 dfs = [pd.read_csv(f, delimiter=";") for f in glob.glob(os.path.join(OUT_FOLDER, "*.csv"))]
 all_reviews = pd.concat(dfs)
+all_reviews = all_reviews.drop(["Unnamed: 0"], axis = 1 )
 
 all_reviews.to_csv(OUT_FILE, sep=";", quoting=csv.QUOTE_NONNUMERIC)
 print("{} Filtered reviews".format(len(all_reviews.index)))
@@ -115,7 +127,7 @@ all_reviews = pd.concat(dfs)
 all_reviews = all_reviews.drop(['criterias', 'userImage', 'scoreText'], axis=1)
 
 all_reviews.to_csv(OUT_FILE_ALL, sep=";", quoting=csv.QUOTE_NONNUMERIC)
-print("{} Filtered reviews".format(len(all_reviews.index)))
+print("{} Unfiltered reviews".format(len(all_reviews.index)))
 
 
 # %%
