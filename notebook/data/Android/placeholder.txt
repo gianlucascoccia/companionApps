@@ -1,1 +1,1 @@
-Due to GitHub limitations the data files are not available.
+Due to GitHub file size limitations the data files can't be uploaded. Please, run donwload the raw data files from the URL listed in the README.md files and run the analysis scripts to replicate our results. 
