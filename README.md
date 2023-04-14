@@ -11,6 +11,24 @@ This study has been designed, developed, and reported by the following investiga
 For any information, interested researchers can contact us by sending an email to any of the investigators listed above. 
 The full dataset including raw data, mining scripts, and analysis scripts produced during the study are available below.
 
+## How to cite
+
+Use the following to cite our study:
+
+```
+@article{SCOCCIA2023101786,
+title = {Studying users’ perception of IoT mobile companion apps},
+journal = {Pervasive and Mobile Computing},
+pages = {101786},
+year = {2023},
+issn = {1574-1192},
+doi = {https://doi.org/10.1016/j.pmcj.2023.101786},
+url = {https://www.sciencedirect.com/science/article/pii/S1574119223000445},
+author = {Gian Luca Scoccia and Romina Eramo and Marco Autili},
+keywords = {Apps, IoT, Android, iOS, Opinion mining, Review analysis}
+}
+```
+
 ## Data
 
 Due to GitHub file size limitations only some data files are available in this repository. To obtain the full data and replicate our results please dowload the raw data from the link below and run the analysis scripts: 
