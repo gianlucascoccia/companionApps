@@ -19,6 +19,7 @@ Use the following to cite our study:
 @article{SCOCCIA2023101786,
 title = {Studying users’ perception of IoT mobile companion apps},
 journal = {Pervasive and Mobile Computing},
+volume = {92},
 pages = {101786},
 year = {2023},
 issn = {1574-1192},
